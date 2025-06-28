@@ -10,6 +10,9 @@ env/
 ENV/
 
 
+.idea/
+*.iml
+
 .ipynb_checkpoints
 
 
