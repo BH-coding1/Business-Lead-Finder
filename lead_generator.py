@@ -61,14 +61,14 @@ class Google_maps_lead_scraper:
         self.wait(1.5, 2)
         try:
             self.wait(1.5, 2)
-            self.all_divisions =self.driver.find_elements(By.CLASS_NAME,'Ppzolf')
+            self.all_divisions =self.driver.find_elements(By.CLASS_NAME,'hfpxzc')
         except (ElementNotInteractableException ,NoSuchElementException,StaleElementReferenceException):
             print('Error in finding element')
             pass
 
 
     def scroll(self,amount_of_scrolls):
-        self.wait(3, 3.5)
+        self.wait(4, 5)
         try:
             self.wait(2, 2.5)
             panel = self.driver.find_element(By.XPATH,'//div[@role="feed"]')
@@ -124,6 +124,7 @@ class Google_maps_lead_scraper:
             all_divisions = self.driver.find_elements(By.CLASS_NAME, 'hfpxzc')
             for i in range(len(all_divisions)):
                 self.wait(2, 2.2)
+                all_divisions = self.driver.find_elements(By.CLASS_NAME, 'hfpxzc')
                 self.driver.execute_script("arguments[0].scrollIntoView(true);", all_divisions[i])
                 self.driver.execute_script("arguments[0].click();", all_divisions[i])
 
@@ -224,38 +225,53 @@ class Google_maps_lead_scraper:
                 'City'
             ])
             for line in range(len(self.all_divisions)):
-                name = self.clean_text(self.all_business_names_list[line] )if line < len(self.all_business_names_list) else ""
-                business_type = self.clean_text(self.business_type_list[line] )if line < len(self.business_type_list) else ""
+                name = self.clean_text(self.all_business_names_list[line] )if line < len(self.all_business_names_list) else "None"
+                business_type = self.clean_text(self.business_type_list[line] )if line < len(self.business_type_list) else "None"
                 phone_number = self.business_phone_number_list[line].replace("+1 ", "").replace("+1", "") if line < len(
-                    self.business_phone_number_list) else ""
-                website = self.clean_text(self.business_website_list[line]) if line < len(self.business_website_list) else ""
-                review = self.clean_text(self.all_reviews_list[line]) if line < len(self.all_reviews_list) else ""
+                    self.business_phone_number_list) else "None"
+                website = self.clean_text(self.business_website_list[line]) if line < len(self.business_website_list) else "None"
+                review = self.clean_text(self.all_reviews_list[line]) if line < len(self.all_reviews_list) else "None"
                 review_count = self.clean_text(self.all_number_of_reviews_list[line]) if line < len(
-                    self.all_number_of_reviews_list) else ""
-                street = self.clean_text(self.business_street_list[line]) if line < len(self.business_street_list) else ""
-                city = self.clean_text(self.business_city_list[line]) if line < len(self.business_street_list) else ""
+                    self.all_number_of_reviews_list) else "None"
+                street = self.clean_text(self.business_street_list[line]) if line < len(self.business_street_list) else "None"
+                city = self.clean_text(self.business_city_list[line]) if line < len(self.business_street_list) else "None"
                 csv_writer.writerow([
                     name, business_type, phone_number, website, review, review_count, street,city
                 ])
     def clean_lists(self):
-        for line in range(len(self.all_divisions)):
-            self.all_business_names_list[line]=self.clean_text(self.all_business_names_list[line])
-            self.business_type_list[line]= self.clean_text(self.business_type_list[line])
-            self.business_phone_number_list[line]= self.business_phone_number_list[line].replace("+1 ", "").replace("+1", "")
-            self.business_website_list[line]= self.clean_text(self.business_website_list[line])
-            self.all_reviews_list[line]= self.clean_text(self.all_reviews_list[line])
-            self.all_number_of_reviews_list[line]= self.clean_text(self.all_number_of_reviews_list[line])
-            self.business_street_list[line]= self.clean_text(self.business_street_list[line])
-            self.business_city_list[line]= self.clean_text(self.business_city_list[line])
+        min_len = min(
+            len(self.all_business_names_list),
+            len(self.business_type_list),
+            len(self.business_phone_number_list),
+            len(self.business_website_list),
+            len(self.all_reviews_list),
+            len(self.all_number_of_reviews_list),
+            len(self.business_street_list),
+            len(self.business_city_list)
+        )
+
+
+        self.all_business_names_list = [self.clean_text(i) for i in self.all_business_names_list[:min_len]]
+        self.business_type_list = [self.clean_text(i) for i in self.business_type_list[:min_len]]
+        self.business_phone_number_list = [i.replace("+1 ", "").replace("+1", "") for i in
+                                           self.business_phone_number_list[:min_len]]
+        self.business_website_list = [self.clean_text(i) for i in self.business_website_list[:min_len]]
+        self.all_reviews_list = [self.clean_text(i) for i in self.all_reviews_list[:min_len]]
+        self.all_number_of_reviews_list = [self.clean_text(i) for i in self.all_number_of_reviews_list[:min_len]]
+        self.business_street_list = [self.clean_text(i) for i in self.business_street_list[:min_len]]
+        self.business_city_list = [self.clean_text(i) for i in self.business_city_list[:min_len]]
     def export_to_spreadsheet(self):
-        df = pd.DataFrame({
-        "Business Name": self.all_business_names_list,
-        "Business Type": self.business_type_list,
-        "Phone Number": self.business_phone_number_list,
-        "Website": self.business_website_list,
-        "Review Score": self.all_reviews_list,
-        "Number of Reviews": self.all_number_of_reviews_list,
-        "Street": self.business_street_list,
-        "City": self.business_city_list
-        })
-        df.to_excel('Lead_Data.xlsx',index=False,engine='openpyxl')
+        try:
+            df = pd.DataFrame({
+            "Business Name": self.all_business_names_list,
+            "Business Type": self.business_type_list,
+            "Phone Number": self.business_phone_number_list,
+            "Website": self.business_website_list,
+            "Review Score": self.all_reviews_list,
+            "Number of Reviews": self.all_number_of_reviews_list,
+            "Street": self.business_street_list,
+            "City": self.business_city_list
+            })
+            df.to_excel('Lead_Data.xlsx',index=False,engine='openpyxl')
+        except ValueError :
+            pass
