@@ -50,22 +50,16 @@ if run_bot:
             lead_scraper = Google_maps_lead_scraper()
             lead_scraper.input_business_and_location(f'{Business_input} in {City_input}')
             st.write('Scrolling the page')
-            lead_scraper.scroll(5)
-            st.write('Getting business names....')
-            lead_scraper.scrape_business_name()
-            st.write('Getting business reviews....')
-            lead_scraper.scrape_business_review()
+            lead_scraper.scroll(10)
             st.write('Getting businesses personal information...')
             lead_scraper.press_on_each_business_link_and_scrape_details()
             st.write('Exporting the data to a csv...')
-            lead_scraper.clean_lists()
             lead_scraper.export_to_csv()
             lead_scraper.export_to_spreadsheet()
             status.update(label='Scraping complete',state='complete',expanded=False)
             st.session_state.data_ready= True
 if st.session_state.data_ready == True :
     col3,col4= st.columns(2)
-
     with col3:
         with open("Lead_Data.csv", "rb") as f:
             st.download_button("Download csv", data=f, file_name="Lead_Data.csv", mime="text/csv",icon=':material/download:')
@@ -77,3 +71,6 @@ if st.session_state.data_ready == True :
             if os.path.exists(csv_file_path):
                 os.remove(csv_file_path)
                 st.success("CSV file deleted!")
+
+    st.markdown("### 💬 We'd love your feedback!")
+    st.markdown('[Click Here to leave a review](https://forms.gle/sx1pr9w1mStCyb2T8)',unsafe_allow_html=True)
